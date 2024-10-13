@@ -13,10 +13,21 @@
     </div>
 
     <script>
+        // 模擬 API 數據
+        const mockData = {
+            block_height: 123456,  // 手動修改數據
+            block_hash: '0000000000000000000abcde123456789abcdef123456789abcdef123456789'
+        };
+
+        // 手動更新數據到頁面
+        document.getElementById('block-height').innerText = mockData.block_height;
+        document.getElementById('block-hash').innerText = mockData.block_hash;
+
         // 使用 Web API 動態更新數據
         async function fetchBlockData() {
             try {
-                const response = await fetch('/api/block_data');
+                const response = await fetch('http://127.0.0.1:5000/api/block_data');
+
                 if (response.ok) {
                     const data = await response.json();
                     document.getElementById('block-height').innerText = data.block_height;
