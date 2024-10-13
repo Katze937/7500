@@ -3,10 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitcoin block height</title>
+    <title>Bitcoin Block Data</title>
 </head>
 <body>
-    <h1>Bitcoin block height</h1>
-    <div>The current block height: {{ block_height }}</div>
+    <h1>Bitcoin Blockchain Data</h1>
+    <div>
+        <p>Current Block Height: <span id="block-height">Loading...</span></p>
+        <p>Current Block Hash: <span id="block-hash">Loading...</span></p>
+    </div>
+
+    <script>
+        // 使用 Web API 動態更新數據
+        async function fetchBlockData() {
+            try {
+                const response = await fetch('/api/block_data');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('block-height').innerText = data.block_height;
+                    document.getElementById('block-hash').innerText = data.block_hash;
+                } else {
+                    console.error('Failed to fetch block data:', response.status);
+                }
+            } catch (error) {
+                console.error('Error fetching block data:', error);
+            }
+        }
+
+        // 定時更新區塊數據
+        setInterval(fetchBlockData, 5000);  // 每 5 秒更新一次
+        fetchBlockData();  // 頁面加載時立即執行一次
+    </script>
 </body>
 </html>
