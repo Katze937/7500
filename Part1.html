@@ -1,48 +1,41 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bitcoin Block Data</title>
 </head>
 <body>
-    <h1>Bitcoin Blockchain Data</h1>
-    <div>
-        <p>Current Block Height: <span id="block-height">Loading...</span></p>
-        <p>Current Block Hash: <span id="block-hash">Loading...</span></p>
-    </div>
+    <h1>Latest Bitcoin Blocks</h1>
+    <div id="blockData"></div>
 
     <script>
-        // 模擬 API 數據
-        const mockData = {
-            block_height: 123456,  // 手動修改數據
-            block_hash: '0000000000000000000abcde123456789abcdef123456789abcdef123456789'
-        };
-
-        // 手動更新數據到頁面
-        document.getElementById('block-height').innerText = mockData.block_height;
-        document.getElementById('block-hash').innerText = mockData.block_hash;
-
-        // 使用 Web API 動態更新數據
         async function fetchBlockData() {
             try {
                 const response = await fetch('http://127.0.0.1:5000/api/block_data');
-
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('block-height').innerText = data.block_height;
-                    document.getElementById('block-hash').innerText = data.block_hash;
-                } else {
-                    console.error('Failed to fetch block data:', response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                const data = await response.json();
+                const blockDataDiv = document.getElementById('blockData');
+                blockDataDiv.innerHTML = data.map(block => `
+                    <div>
+                        <p>Height: ${block.height}</p>
+                        <p>Time: ${new Date(block.time * 1000).toLocaleString()}</p>
+                        <p>Size: ${block.size} bytes</p>
+                        <p>Transaction Count: ${block.tx_count}</p>
+                        <p>Merkle Root: ${block.merkle_root}</p>
+                        <hr>
+                    </div>
+                `).join('');
             } catch (error) {
                 console.error('Error fetching block data:', error);
+                document.getElementById('blockData').innerText = 'Failed to load data';
             }
         }
 
-        // 定時更新區塊數據
-        setInterval(fetchBlockData, 5000);  // 每 5 秒更新一次
-        fetchBlockData();  // 頁面加載時立即執行一次
+        // Fetch block data on page load
+        window.onload = fetchBlockData;
     </script>
 </body>
 </html>
