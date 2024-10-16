@@ -1,9 +1,11 @@
 from flask import Flask, jsonify
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
+from flask_cors import CORS  # 從 flask_cors 導入 CORS
+
 
 # RPC connection settings
 rpc_user = "__cookie__"
-rpc_password = "b7281293a06c2496e4ebada7ec6c221bce3a59d34bffbfddbdc526a4f282662c"
+rpc_password = "823dd4e77b0be3df662d9d4af80193592a9ad61c8c8509e0f40872bd218a40c7"
 rpc_host = "127.0.0.1"
 rpc_port = "8332"
 
@@ -16,6 +18,7 @@ except Exception as e:
     print("Error connecting to Bitcoin Core:", str(e))
 
 app = Flask(__name__)
+CORS(app)
 
 def get_latest_blocks(num_blocks=10):
     latest_block_hash = rpc_connection.getbestblockhash()
@@ -43,6 +46,7 @@ def get_block_data():
     except Exception as e:
         print("Error fetching block data:", str(e))
         return jsonify({"error": str(e)}), 500
+    pass
 
 if __name__ == '__main__':
     app.run(port=5000)
