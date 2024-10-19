@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Metrics Dashboard</title>
+</head>
+<body>
+    <h1>Bitcoin Metrics Dashboard</h1>
+
+    <!-- On-chain Metrics 區塊 -->
+    <section>
+        <h2>On-chain Metrics</h2>
+        <table border="1" id="onChainTable">
+            <thead>
+                <tr>
+                    <th>Height</th>
+                    <th>Merkle Root</th>
+                    <th>Size (bytes)</th>
+                    <th>Time</th>
+                    <th>Transaction Count</th>
+                    <th>Mining Difficulty</th>
+                    <th>Transaction Fees</th>
+                </tr>
+            </thead>
+            <tbody id="onChainData">
+            </tbody>
+        </table>
+
+        <h3>On-chain Data Visualization</h3>
+        <canvas id="onChainChart"></canvas>
+    </section>
+
+    <!-- Off-chain Metrics 區塊 -->
+    <section>
+        <h2>Off-chain Metrics</h2>
+        <table border="1" id="offChainTable">
+            <thead>
+                <tr>
+                    <th>Market Price</th>
+                    <th>Trading Volume</th>
+                    <th>Average Block Confirmation Time</th>
+                </tr>
+            </thead>
+            <tbody id="offChainData">
+            </tbody>
+        </table>
+
+        <h3>Off-chain Data Visualization</h3>
+        <canvas id="offChainChart"></canvas>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function fetchOnChainData() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/block_data');
+                const data = await response.json();
+                const onChainTable = document.getElementById('onChainData');
+                onChainTable.innerHTML = data.map(block => `
+                    <tr>
+                        <td>${block.height}</td>
+                        <td>${block.merkle_root}</td>
+                        <td>${block.size}</td>
+                        <td>${new Date(block.time * 1000).toLocaleString()}</td>
+                        <td>${block.tx_count}</td>
+                        <td>${block.difficulty}</td>
+                        <td>${block.fees}</td>
+                    </tr>
+                `).join('');
+
+                // 視覺化部分（折線圖）
+                const ctx = document.getElementById('onChainChart').getContext('2d');
+                const chartData = {
+                    labels: data.map(block => block.height),
+                    datasets: [{
+                        label: 'Block Size (bytes)',
+                        data: data.map(block => block.size),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false
+                    }, {
+                        label: 'Transaction Count',
+                        data: data.map(block => block.tx_count),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false
+                    }]
+                };
+                new Chart(ctx, {
+                    type: 'line',
+                    data: chartData,
+                    options: {
+                        scales: {
+                            x: { title: { display: true, text: 'Block Height' }},
+                            y: { title: { display: true, text: 'Value' }}
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching on-chain data:', error);
+            }
+        }
+
+        async function fetchOffChainData() {
+            try {
+                // 獲取比特幣價格
+                const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                const priceData = await priceResponse.json();
+                
+                // 獲取比特幣市場交易量
+                const volumeResponse = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1');
+                const volumeData = await volumeResponse.json();
+
+                const offChainTable = document.getElementById('offChainData');
+                offChainTable.innerHTML = `
+                    <tr>
+                        <td>${priceData.bitcoin.usd}</td>
+                        <td>${volumeData.total_volumes[volumeData.total_volumes.length - 1][1]}</td>
+                        <td>/* Avg confirmation time from backend */</td>
+                    </tr>
+                `;
+
+                // 視覺化部分（如需要可用 Chart.js 繪製交易量）
+            } catch (error) {
+                console.error('Error fetching off-chain data:', error);
+            }
+        }
+
+
+        // 在頁面加載時獲取資料
+        window.onload = function() {
+            fetchOnChainData();
+            fetchOffChainData();
+        };
+    </script>
+</body>
+</html>

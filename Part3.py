@@ -5,7 +5,7 @@ from flask_cors import CORS  # 從 flask_cors 導入 CORS
 
 # RPC connection settings
 rpc_user = "__cookie__"
-rpc_password = "ff86e9362e6e20caded7bfa8d4611221293352dfabf9fac59844815ac523a27a"
+rpc_password = "ab70b9f4ea57465359a766db25fd3352f05f73eaaf1bd89665a7971508dd0ed7"
 rpc_host = "127.0.0.1"
 rpc_port = "8332"
 
